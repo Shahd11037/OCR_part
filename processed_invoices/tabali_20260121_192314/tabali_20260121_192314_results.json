@@ -1,0 +1,288 @@
+{
+  "invoice_id": "tabali_20260121_192314",
+  "timestamp": "2026-01-21T19:23:30.599064",
+  "extracted_data": {
+    "invoice_number": {
+      "value": null,
+      "confidence": 0.0,
+      "source": null,
+      "zone": null
+    },
+    "dates": {
+      "invoice_date": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "due_date": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "other_dates": []
+    },
+    "amounts": {
+      "total": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "subtotal": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "tax": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "discount": {
+        "value": null,
+        "confidence": 0.0
+      }
+    },
+    "tax_info": {
+      "tax_id": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "tax_percentage": {
+        "value": null,
+        "confidence": 0.0
+      }
+    },
+    "vendor_info": {
+      "name": {
+        "value": "Tabali",
+        "confidence": 0.976162460620403,
+        "source": "position_heuristic"
+      },
+      "address": {
+        "value": [],
+        "confidence": 0.0
+      },
+      "phone": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "email": {
+        "value": null,
+        "confidence": 0.0
+      }
+    },
+    "customer_info": {
+      "name": {
+        "value": null,
+        "confidence": 0.0
+      },
+      "address": {
+        "value": [],
+        "confidence": 0.0
+      }
+    },
+    "line_items": [
+      {
+        "description": "Order 1-222",
+        "quantity": null,
+        "unit_price": null,
+        "amount": null,
+        "confidence": 0.471615276351892
+      },
+      {
+        "description": "Receipt dac27- TW:2022-1=222-_",
+        "quantity": null,
+        "unit_price": null,
+        "amount": 3.0,
+        "confidence": 0.496598484178832
+      },
+      {
+        "description": "10902",
+        "quantity": null,
+        "unit_price": null,
+        "amount": null,
+        "confidence": 0.9984396801324931
+      },
+      {
+        "description": "ILEI",
+        "quantity": null,
+        "unit_price": null,
+        "amount": null,
+        "confidence": 0.5305196046829224
+      },
+      {
+        "description": "Pepsi",
+        "quantity": null,
+        "unit_price": null,
+        "amount": 19.0,
+        "confidence": 0.7125533361152412
+      },
+      {
+        "description": "Subtotal",
+        "quantity": null,
+        "unit_price": null,
+        "amount": 19.95,
+        "confidence": 0.6688622393348265
+      },
+      {
+        "description": "Item Sales",
+        "quantity": null,
+        "unit_price": null,
+        "amount": 19.95,
+        "confidence": 0.9652360602035361
+      },
+      {
+        "description": "٧AT",
+        "quantity": null,
+        "unit_price": null,
+        "amount": 2.79,
+        "confidence": 0.8142975394946131
+      }
+    ],
+    "currency": {
+      "value": "USD",
+      "confidence": 0.8,
+      "source": "pattern_match"
+    },
+    "payment_terms": {
+      "value": null,
+      "confidence": 0.0
+    },
+    "metadata": {
+      "extraction_confidence": 0.10448014474237664,
+      "fields_extracted": 9,
+      "total_fields": 9
+    }
+  },
+  "validation": {
+    "overall_status": "FAILED",
+    "quality_score": 37.5,
+    "summary": {
+      "total_checks": 8,
+      "passed": 3,
+      "failed": 5,
+      "errors": 5,
+      "warnings": 0,
+      "info": 3
+    },
+    "errors": [
+      {
+        "field": "invoice_number",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'invoice_number' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "dates.invoice_date",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'dates.invoice_date' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "amounts.total",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'amounts.total' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "invoice_number",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Invoice number is missing",
+        "suggested_fix": "Check header zone extraction"
+      },
+      {
+        "field": "metadata.confidence",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Very low extraction confidence (10.4%)",
+        "suggested_fix": "Image quality is poor, manual review required"
+      }
+    ],
+    "warnings": [],
+    "info": [
+      {
+        "field": "currency",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Required field 'currency' is present",
+        "suggested_fix": null
+      },
+      {
+        "field": "currency",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Currency validated: USD",
+        "suggested_fix": null
+      },
+      {
+        "field": "line_items",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Found 8 line items",
+        "suggested_fix": null
+      }
+    ],
+    "all_results": [
+      {
+        "field": "invoice_number",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'invoice_number' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "dates.invoice_date",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'dates.invoice_date' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "amounts.total",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Required field 'amounts.total' is missing or empty",
+        "suggested_fix": "Check OCR quality and field extraction logic"
+      },
+      {
+        "field": "currency",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Required field 'currency' is present",
+        "suggested_fix": null
+      },
+      {
+        "field": "invoice_number",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Invoice number is missing",
+        "suggested_fix": "Check header zone extraction"
+      },
+      {
+        "field": "currency",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Currency validated: USD",
+        "suggested_fix": null
+      },
+      {
+        "field": "line_items",
+        "is_valid": true,
+        "severity": "info",
+        "message": "Found 8 line items",
+        "suggested_fix": null
+      },
+      {
+        "field": "metadata.confidence",
+        "is_valid": false,
+        "severity": "error",
+        "message": "Very low extraction confidence (10.4%)",
+        "suggested_fix": "Image quality is poor, manual review required"
+      }
+    ],
+    "requires_manual_review": true,
+    "recommended_actions": [
+      "    Critical errors found - manual review required",
+      "   Fix 5 error(s) before processing"
+    ]
+  }
+}
