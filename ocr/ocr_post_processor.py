@@ -130,13 +130,34 @@ class OCRPostProcessor:
         """
         Fix mixed Arabic/English characters in words.
         Determines if word should be Arabic or English based on context.
+        Preserves numbers and currency amounts.
         """
+        # IMPORTANT: Don't touch if it contains amounts or numbers with decimals
+        # Example: "Total 123.45 EGP" should not be converted
+        if re.search(r'\d+[.,]\d+', text):  # Has decimal numbers
+            # Only fix known character confusions, don't do wholesale conversion
+            # Just fix the obvious OCR errors in amounts
+            for arabic, english in self.arabic_to_english.items():
+                # Only fix if it's likely an OCR error in an amount context
+                if arabic in ['ه', 'ل', 'ا']:  # These shouldn't be in numbers
+                    continue  # Skip these in mixed text
+                text = text.replace(arabic, english)
+            return text
+
+        # If text contains Western digits (0-9), it's likely English/mixed
+        # Don't convert English letters to Arabic in this case
+        if re.search(r'[0-9]', text):
+            # Only fix Arabic characters that shouldn't be there
+            for arabic, english in self.arabic_to_english.items():
+                text = text.replace(arabic, english)
+            return text
+
         # If text is mostly English, convert Arabic characters
         if self._is_mostly_latin(text):
             for arabic, english in self.arabic_to_english.items():
                 text = text.replace(arabic, english)
 
-        # If text is mostly Arabic, convert English characters
+        # If text is mostly Arabic AND has no numbers, convert English characters
         elif self._is_mostly_arabic(text):
             for english, arabic in self.english_to_arabic.items():
                 text = text.replace(english, arabic)
@@ -161,6 +182,14 @@ class OCRPostProcessor:
 
     def fix_numbers(self, text: str) -> str:
         """Fix common number OCR errors"""
+        # IMPORTANT: Don't convert Arabic digits in currency codes
+        # Let fix_currency() handle those first
+        # Skip if text looks like a currency code pattern
+        if re.match(r'^[٤E٥٦٧٨٩][A-Za-zا-ي؟\)]{1,3}$', text):
+            # Looks like a currency code (e.g., ٤GP, ٤G؟)
+            # Don't process it here - let fix_currency handle it
+            return text
+
         # First, convert Arabic-Indic digits to Western
         for arabic, western in self.arabic_digits.items():
             text = text.replace(arabic, western)
@@ -193,31 +222,49 @@ class OCRPostProcessor:
 
     def fix_currency(self, text: str) -> str:
         """Fix currency code errors"""
-        # Convert Arabic-Indic digits first
+        # Strategy: Use a single comprehensive pattern that matches all variations
+        # and replaces them in one go to avoid double-matching
+
+        # Quick check: if already correct, return immediately
+        if text.upper() == 'EGP' or text.upper().startswith('EGP '):
+            return text
+
+        # Step 1: Create a comprehensive pattern for all EGP variations
+        # This matches the ENTIRE currency code in one pattern
+        egp_pattern = r'''
+            (?:
+                [٤E]                    # E or Arabic 4
+                [0O6oGgGق\[]?          # Optional confused G character
+                [Pp؟\)]+               # P, ؟, or ) - one or more
+            |
+                E+P                     # EEP, EP (missing or double E)
+            |
+                \b[0O6][Pp]             # 6P, 0P at word boundary (missing E)
+            |
+                \[[0O6]?[Pp]            # [P, [6P (bracket confusion)
+            )
+            (?=\s|$|\d)                # Followed by space, end, or digit
+        '''
+
+        # Replace all variations with EGP
+        text = re.sub(egp_pattern, 'EGP', text, flags=re.VERBOSE | re.IGNORECASE)
+
+        # Step 2: NOW convert Arabic-Indic digits to Western (safe now)
         for arabic, western in self.arabic_digits.items():
             text = text.replace(arabic, western)
 
-        text_upper = text.upper()
+        # Step 3: Clean up specific known patterns (avoid substring matches)
+        # Only apply if not already EGP
+        if text.upper() != 'EGP':
+            for wrong, correct in self.currency_fixes.items():
+                # Use word boundaries to avoid matching substrings
+                # e.g., don't match "EP" inside "EGP"
+                if len(wrong) >= 3:  # Full codes like EEP, E6P
+                    pattern = r'\b' + re.escape(wrong) + r'\b'
+                    text = re.sub(pattern, correct, text, flags=re.IGNORECASE)
 
-        # Check all known incorrect patterns
-        for wrong, correct in self.currency_fixes.items():
-            if wrong.upper() in text_upper:
-                # Replace while preserving case
-                pattern = re.escape(wrong)
-                text = re.sub(pattern, correct, text, flags=re.IGNORECASE)
-
-        # Fix specific patterns with regex
-        # Matches: E + (any char that could be G) + P
-        text = re.sub(r'E[0O6oG\[]P', 'EGP', text, flags=re.IGNORECASE)
-
-        # Fix: [number]P at end of amounts (missing EG)
+        # Step 4: Fix edge case where we have [digit] at start of amount
         text = re.sub(r'\[(\d)', r'EGP \1', text)
-
-        # Fix common misreads in "EGP"
-        text = re.sub(r'E+P(?=\s*\d)', 'EGP', text)  # EEP, EP → EGP
-
-        # Fix Arabic patterns
-        text = re.sub(r'[٤E][G][؟\)]', 'EGP', text)
 
         return text
 
@@ -247,10 +294,15 @@ class OCRPostProcessor:
             'sub-total': 'subtotal',
             '٧at': 'vat',
             'vاt': 'vat',
-            'ilei': 'q',  # Column header "Q"
-            'ileii': 'q',
         }
 
+        # Case-sensitive fixes (must match exact case)
+        case_sensitive_fixes = {
+            'ILEI': 'Q',   # Column header "Q" misread as "ILEI"
+            'ILEII': 'Q',  # Column header "Q" misread as "ILEII"
+        }
+
+        # Apply case-insensitive fixes
         for wrong, correct in fixes.items():
             if text.lower() == wrong.lower():
                 # Preserve case
@@ -260,6 +312,12 @@ class OCRPostProcessor:
                     text = correct.capitalize()
                 else:
                     text = correct
+                break
+
+        # Apply case-sensitive fixes
+        for wrong, correct in case_sensitive_fixes.items():
+            if text == wrong:  # Exact match only
+                text = correct
                 break
 
         return text

@@ -3,10 +3,6 @@ Receipt Testing Script
 Tests different OCR configurations to find the best settings for receipts.
 """
 
-import sys
-
-sys.path.append('/home/claude/invoice_processor')
-
 from ocr.invoice_ocr import InvoiceOCR
 from preprocessing.preprocess import preprocess_image
 from preprocessing.reciept_preprocessing import preprocess_receipt, preprocess_receipt_conservative
@@ -92,22 +88,22 @@ def print_key_results(results, test_name):
         # Highlight key fields
         if 'date' in text.lower() or '2022' in text or '2023' in text or '2024' in text:
             if not date_found:
-                print(f"  📅 Date: {text}")
+                print(f"   Date: {text}")
                 date_found = True
 
         if 'total' in text.lower() and not 'sub' in text.lower():
             if not total_found:
-                print(f"  💰 Total: {text}")
+                print(f"   Total: {text}")
                 total_found = True
 
         if 'vat' in text.lower() or 'tax' in text.lower():
             if not vat_found:
-                print(f"  🧾 VAT: {text}")
+                print(f"   VAT: {text}")
                 vat_found = True
 
         # Show currency
         if 'egp' in text.lower() or 'sar' in text.lower():
-            print(f"  💵 Currency: {text}")
+            print(f"   Currency: {text}")
 
     # Show amounts
     print("\n  Amounts found:")

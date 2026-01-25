@@ -3,6 +3,7 @@ Receipt Preprocessing Module
 Specialized preprocessing for thermal receipts and low-contrast documents.
 Optimized for Arabic/English mixed text.
 """
+# conservative works better for now///////////////////////////////(preprocess_receipt_conservative)
 
 import cv2
 import numpy as np
@@ -110,8 +111,6 @@ def preprocess_receipt_conservative(image_path: str) -> Optional[np.ndarray]:
 
 # Example usage
 if __name__ == "__main__":
-    import sys
-
     image_path = "..//tabali.jpg"
 
     # Test both methods
@@ -126,5 +125,3 @@ if __name__ == "__main__":
     if result2 is not None:
         cv2.imwrite("receipt_conservative.jpg", result2)
         print("Saved: receipt_conservative.jpg")
-
-    print("\nCompare the outputs to see which works better for your receipts!")
