@@ -1,3 +1,8 @@
+"""
+comparing easyOCR with pytesseract on the collected receipts.
+comparison: character error rate
+"""
+
 import easyocr
 import pytesseract
 import cv2

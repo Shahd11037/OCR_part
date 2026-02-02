@@ -6,3 +6,5 @@ image.jpg
 chicken_fila.jpg
 invoice_processor.log
 ocr_results.json
+ocr/test_currency_order.py
+ocr/test_reciept.py

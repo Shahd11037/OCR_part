@@ -1,6 +1,9 @@
 """
 Simple Receipt Processor
 Extracts: date, total, and category from receipts.
+
+pipeline: reciept_preprocessing -> easyOCR -> post_processing
+-> simple data extraction -> categorization -> json exportation
 """
 
 import sys
