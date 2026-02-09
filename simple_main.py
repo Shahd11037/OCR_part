@@ -5,7 +5,6 @@ Extracts: date, total, and category from receipts.
 pipeline: reciept_preprocessing -> easyOCR -> post_processing
 -> simple data extraction -> categorization -> json exportation
 """
-
 import sys
 import json
 from pathlib import Path
@@ -13,11 +12,7 @@ from pathlib import Path
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ocr.invoice_ocr import InvoiceOCR
-from preprocessing.reciept_preprocessing import preprocess_receipt_conservative
-from extraction.simple_extractor import SimpleExtractor
-from validation.categorizer import ReceiptCategorizer
-import cv2
+from core_processor import get_processor
 
 
 def process_receipt(image_path: str, save_json: bool = True) -> dict:
@@ -34,62 +29,26 @@ def process_receipt(image_path: str, save_json: bool = True) -> dict:
     print(f"Processing: {image_path}")
     print("=" * 60)
 
-    # Step 1: Preprocess
-    print("[1/4] Preprocessing image...")
-    preprocessed = preprocess_receipt_conservative(image_path)
+    # Get processor instance
+    processor = get_processor(use_gpu=True)
 
-    if preprocessed is not None:
-        # Save preprocessed image temporarily
-        temp_path = "/tmp/preprocessed_receipt.jpg"
-        cv2.imwrite(temp_path, preprocessed)
-        ocr_image_path = temp_path
-    else:
-        print("  Warning: Preprocessing failed, using original image")
-        ocr_image_path = image_path
+    # Process
+    print("[1/1] Processing receipt...")
+    result = processor.process(image_path)
 
-    # Step 2: OCR
-    print("[2/4] Running OCR...")
-    ocr = InvoiceOCR(use_gpu=True, enable_post_processing=True)
-    ocr_results = ocr.extract_text_with_boxes(ocr_image_path, use_preprocessing=False)
-    print(f"  Extracted {len(ocr_results)} text elements")
-
-    # Step 3: Extract fields
-    print("[3/4] Extracting date and total...")
-    extractor = SimpleExtractor()
-    extracted = extractor.extract(ocr_results)
-
-    print(f"  Date: {extracted['date']}")
-    print(f"  Total: {extracted['total']}")
-    print(f"  Line items found: {len(extracted['line_items'])}")
-
-    # Step 4: Categorize
-    print("[4/4] Categorizing receipt...")
-
-    # Get vendor name (usually first or second text element)
-    vendor_name = ""
-    if len(ocr_results) > 0:
-        vendor_name = ocr_results[0]['text']
-
-    categorizer = ReceiptCategorizer()
-    category = categorizer.categorize(vendor_name, extracted['line_items'])
-    print(f"  Category: {category}")
-
-    # Build final result
-    result = {
-        "date": extracted['date'],
-        "total": extracted['total'],
-        "category": category
-    }
+    print(f"  Date: {result['date']}")
+    print(f"  Total: {result['total']}")
+    print(f"  Category: {result['category']}")
 
     # Save JSON
     if save_json:
         output_path = Path(image_path).stem + "_result.json"
         with open(output_path, 'w', encoding='utf-8') as f:
             json.dump(result, f, indent=2, ensure_ascii=False)
-        print(f"\nSaved result to: {output_path}")
+        print(f"\nSaved to: {output_path}")
 
     print("=" * 60)
-    print("\n Processing complete!")
+    print("\nProcessing complete!")
     print(json.dumps(result, indent=2, ensure_ascii=False))
 
     return result
@@ -120,7 +79,7 @@ def process_batch(image_paths: list) -> list:
                 **result
             })
         except Exception as e:
-            print(f" Error processing {image_path}: {e}")
+            print(f"Error processing {image_path}: {e}")
             results.append({
                 "file": image_path,
                 "success": False,
@@ -143,9 +102,6 @@ def process_batch(image_paths: list) -> list:
 
 
 if __name__ == "__main__":
+    image_paths = ""
 
-    image_paths = ["D:/Dying/4th year/seventh term/GP/ocr part/chicken_fila.jpg"]
-
-    if len(image_paths) == 1:
-        # Single receipt
-        process_receipt(image_paths[0])
+    process_receipt(image_paths[0])
