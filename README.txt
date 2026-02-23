@@ -1,5 +1,5 @@
 ---
-title: Receipt OCR API
+title: ReceiptOCR
 emoji: 🧾
 colorFrom: blue
 colorTo: green
