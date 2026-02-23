@@ -1,10 +1,12 @@
 FROM python:3.12-slim
 
+# Make sure there is a clear NEW LINE after the first RUN block
 RUN apt-get update && apt-get install -y \
     libgl1 \
     libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*
 
+# This must be on its own line
 RUN useradd -m -u 1000 user
 USER user
 ENV HOME=/home/user \
@@ -13,7 +15,6 @@ ENV HOME=/home/user \
 WORKDIR $HOME/app
 
 COPY --chown=user requirements.txt .
-
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir --user -r requirements.txt
