@@ -1,7 +1,7 @@
 name: Sync to Hugging Face hub
 on:
   push:
-    branches: [experimental-branch]
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 1
+          fetch-depth: 0
           lfs: true
       - name: Push to hub
         env:
@@ -18,7 +18,5 @@ jobs:
         run: |
           git config --global user.email "shahd@example.com"
           git config --global user.name "Shahd"
-          git checkout --orphan latest_branch
-          git add -A
-          git commit -m "Initial deploy"
-          git push --force https://Shahd11037:$HF_TOKEN@huggingface.co/spaces/Shahd11037/ReceiptOCR latest_branch:main
+          # Push the local 'master' branch to the remote Hugging Face 'main' branch
+          git push --force https://Shahd11037:$HF_TOKEN@huggingface.co/spaces/Shahd11037/ReceiptOCR master:main
