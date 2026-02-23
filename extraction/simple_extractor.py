@@ -124,46 +124,26 @@ class SimpleExtractor:
         return None
 
     def _extract_total(self, ocr_results: List[Dict]) -> Optional[float]:
-        """Extract total amount"""
-
         candidates = []
-
-        # Strategy: Look for total keyword + nearby amounts
         for i, element in enumerate(ocr_results):
             text = element['text'].lower()
-
-            # Check if this element has "total" keyword
             if any(keyword in text for keyword in self.total_keywords):
-                # Look for amounts in nearby elements
-                for j in range(max(0, i - 1), min(len(ocr_results), i + 4)):
-                    nearby_text = ocr_results[j]['text']
-                    amount = self._parse_amount(nearby_text)
+                # Scan a small window around the keyword
+                for j in range(max(0, i - 1), min(len(ocr_results), i + 5)):
+                    amount = self._parse_amount(ocr_results[j]['text'])
                     if amount:
-                        # Higher confidence for amounts right next to "total"
-                        confidence = 1.0 if j == i or j == i + 1 else 0.7
-                        candidates.append({
-                            'amount': amount,
-                            'confidence': confidence,
-                            'position': j
-                        })
+                        # Generic confidence: Prefer numbers with decimals
+                        conf = 1.0 if ('.' in ocr_results[j]['text']) else 0.6
+                        candidates.append({'amount': amount, 'conf': conf})
 
-        # If we found candidates near "total", pick the highest confidence
         if candidates:
-            best = max(candidates, key=lambda x: x['confidence'])
-            return best['amount']
+            # Pick the most confident, then the largest (The true "Grand Total")
+            best = sorted(candidates, key=lambda x: (x['conf'], x['amount']), reverse=True)
+            return best[0]['amount']
 
-        # Fallback: Find the largest amount in the document
-        # (usually the total is the largest number)
-        all_amounts = []
-        for element in ocr_results:
-            amount = self._parse_amount(element['text'])
-            if amount:
-                all_amounts.append(amount)
-
-        if all_amounts:
-            return max(all_amounts)
-
-        return None
+        # Universal Fallback: Max value within a reasonable price range
+        all_vals = [self._parse_amount(e['text']) for e in ocr_results if self._parse_amount(e['text'])]
+        return max([v for v in all_vals if 0.5 < v < 50000]) if all_vals else None
 
     def _parse_amount(self, text: str) -> Optional[float]:
         """Parse amount from text"""
