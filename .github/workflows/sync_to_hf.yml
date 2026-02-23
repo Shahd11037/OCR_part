@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 1
           lfs: true
       - name: Push to hub
         env:
@@ -18,5 +18,9 @@ jobs:
         run: |
           git config --global user.email "shahd@example.com"
           git config --global user.name "Shahd"
-          # Push the local 'master' branch to the remote Hugging Face 'main' branch
-          git push --force https://Shahd11037:$HF_TOKEN@huggingface.co/spaces/Shahd11037/ReceiptOCR master:main
+          # Create a temporary 'clean' branch with no history
+          git checkout --orphan temp_deploy
+          git add -A
+          git commit -m "Clean deploy to bypass history limits"
+          # Force push this clean state to HF's main branch
+          git push --force https://Shahd11037:$HF_TOKEN@huggingface.co/spaces/Shahd11037/ReceiptOCR temp_deploy:main
