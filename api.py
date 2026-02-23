@@ -204,6 +204,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",  # Listen on all network interfaces
-        port=8000,   #change port number to the one you have available
+        port=7860,   #change port number to the one you have available
         log_level="info"
     )
