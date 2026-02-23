@@ -3,7 +3,7 @@ Receipt Processing API
 Simple API that accepts receipt images and returns date, total, and category.
 
 Install dependencies:
-    pip install fastapi uvicorn python-multipart --break-system-packages
+    pip install -r requirements.txt
 
 Test:
     curl -X POST "http://localhost:8000/process-receipt" -F "file=@receipt.jpg"
@@ -204,6 +204,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",  # Listen on all network interfaces
-        port=8000,
+        port=8000,   #change port number to the one you have available
         log_level="info"
     )

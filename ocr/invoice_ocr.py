@@ -29,7 +29,7 @@ class InvoiceOCR:
     Uses EasyOCR with Arabic and English language support.
     """
 
-    def __init__(self, use_gpu: bool = True, languages: List[str] = None, enable_post_processing: bool = True):
+    def __init__(self, use_gpu: bool = False, languages: List[str] = None, enable_post_processing: bool = True):
         """
         Initialize the OCR reader.
 
