@@ -17,6 +17,7 @@ import tempfile
 import os
 from pathlib import Path
 import sys
+from datetime import datetime
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent))
@@ -100,12 +101,17 @@ async def process_receipt(file: UploadFile = File(...)):
         # Process the receipt
         result = process_receipt_internal(tmp_path)
 
-        # Clean up temporary file
+        # 2. Add the epoch timestamp conversion
+        if result.get('date'):
+            result['date_epoch_ms'] = date_to_epoch_ms(result['date'])
+        else:
+            result['date_epoch_ms'] = None
+
         os.unlink(tmp_path)
 
         return JSONResponse(content={
             "success": True,
-            "data": result,
+            "data": result,  # Now includes 'date_epoch_ms'
             "filename": file.filename
         })
 
@@ -132,6 +138,18 @@ def process_receipt_internal(image_path: str) -> dict:
         Dict with date, total, and category
     """
     return processor.process(image_path)
+
+def date_to_epoch_ms(date_str: str) -> int:
+    """Helper to convert YYYY-MM-DD to epoch milliseconds"""
+    try:
+        if not date_str:
+            return None
+        # Convert string to datetime object
+        dt = datetime.strptime(date_str, "%Y-%m-%d")
+        # Convert to epoch seconds and then to milliseconds
+        return int(dt.timestamp() * 1000)
+    except Exception:
+        return None
 
 
 @app.post("/process-receipt-detailed")
@@ -185,6 +203,16 @@ async def process_receipt_detailed(file: UploadFile = File(...)):
 
 # Run the server
 if __name__ == "__main__":
+    image_path = "D:/Dying/4th year/seventh term/GP/ocr part/tabali.jpg"
+
+    print(f"Processing: {image_path}")
+    result = process_receipt_internal(image_path)
+
+    print("\nResult:")
+    print(f"  Date:     {result['date']}")
+    print(f"  Total:    {result['total']}")
+    print(f"  Category: {result['category']}")
+
     print("\n" + "=" * 60)
     print("  Starting Receipt Processor API")
     print("=" * 60)
